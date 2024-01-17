@@ -1,4 +1,9 @@
-import { createApp } from 'nativescript-vue';
-import Home from './components/Home.vue';
+import { createApp, registerElement } from "nativescript-vue";
+import DrawerPlugin from "@nativescript-community/ui-drawer/vue3";
+import "@/utils/touchManagerUtils";
+import Home from "./components/Home.vue";
 
-createApp(Home).start();
+const app = createApp(Home);
+app.use(DrawerPlugin);
+
+app.start();
