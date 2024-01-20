@@ -4,33 +4,85 @@
   import { Drawer } from "@nativescript-community/ui-drawer";
   import Details from "./Details.vue";
   import Gestures from "./Gestures.vue";
+  import { EventData, View } from "@nativescript/core";
 
   export default {
     setup() {
-      // const drawer = ref(null);
-      // return {
-      //   drawer
-      // };
+      const drawer = ref(null);
+      return {
+        drawer
+      };
     },
+
     data() {
       return {
-        items: new Array(100).fill({ title: "My profile" })
+        items: new Array(100).fill({ title: "My profile" }),
+        isDrawerOpen: false
+        // drawer: undefined as unknown as Drawer,
       };
+    },
+    mounted() {
+      // this.drawer = this.$refs.drawer as Drawer;
     },
     methods: {
       onDrawerLoaded(args: any) {
-        const drawer = args.object as any;
-        console.log("drawer", drawer);
+        // const drawer = args.object as any;
+        // drawer = this.$refs.drawer as Drawer;
+        // console.log("drawer", drawer);
       },
-
       // note: for some reason these methods don't work if called from a function registered in setup() or <script setup>
       onOpenDrawer(side: string) {
-        const drawer = this.$refs.drawer as Drawer;
-        drawer.nativeView.open(side);
+        const drawer = (this.$refs as any).drawer as Drawer;
+        (this.$refs as any)["drawer"].nativeView.open(side, 500);
       },
       onCloseDrawer() {
-        const drawer = this.$refs.drawer as Drawer;
-        drawer.nativeView.close();
+        // const drawer = this.$refs.drawer as Drawer;
+        (this.$refs as any)["drawer"].nativeView.close();
+      },
+      menuTap(args: EventData) {
+        console.log("menu tap!!");
+        this.toggleDrawerMode();
+        const btn = args.object as View;
+        this.setButtonClass(btn);
+        if (this.isDrawerOpen) this.onOpenDrawer("left");
+        else this.onCloseDrawer();
+      },
+
+      setButtonClass(btn: View) {
+        const bar1 = btn.getViewById("bar1") as View;
+        const bar2 = btn.getViewById("bar2") as View;
+        const bar3 = btn.getViewById("bar3") as View;
+        console.log("bar1", bar1);
+
+        this.toggleClassOnView(bar1, "menu-bar-on", "menu-bar-off");
+        this.toggleClassOnView(bar2, "menu-bar-on", "menu-bar-off");
+        this.toggleClassOnView(bar3, "menu-bar-on", "menu-bar-off");
+      },
+
+      toggleClassOnView(view: View, className1: string, className2: string) {
+        let newClassName = view.className.trim();
+        if (view.className.indexOf(className1) >= 0) {
+          newClassName = view.className.replace(className1, "");
+          newClassName = newClassName.trim() + " " + className2;
+        } else {
+          newClassName = view.className.replace(className2, "");
+          newClassName = newClassName.trim() + " " + className1;
+        }
+
+        view.className = newClassName;
+        console.log("className", view.className);
+      },
+
+      toggleDrawerMode() {
+        this.isDrawerOpen = !this.isDrawerOpen;
+      },
+      onOpen() {
+        console.log("onOpen");
+        if (!this.isDrawerOpen) this.toggleDrawerMode();
+      },
+      onClose() {
+        console.log("onClose");
+        if (this.isDrawerOpen) this.toggleDrawerMode();
       }
     }
   };
@@ -39,8 +91,14 @@
 <template>
   <Frame>
     <Page>
-      <ActionBar>
-        <Label text="Home" class="font-bold text-lg" />
+      <ActionBar class="action-bar" title="Home" :flat="true" icon="">
+        <ActionItem>
+          <StackLayout ref="btn" class="p-4" @tap="menuTap">
+            <Label id="bar1" class="bar bar1" />
+            <Label id="bar2" class="bar bar2" />
+            <Label id="bar3" class="bar bar3" />
+          </StackLayout>
+        </ActionItem>
       </ActionBar>
       <Drawer
         @loaded="onDrawerLoaded"
@@ -49,6 +107,8 @@
           failOffsetYStart: -10,
           failOffsetYEnd: 10
         }"
+        @open="onOpen"
+        @close="onClose"
       >
         <GridLayout ~leftDrawer class="drawer" width="80%" backgroundColor="white" rows="auto, *">
           <StackLayout backgroundColor="#eeeeee" padding="25">
@@ -105,7 +165,6 @@
       color: white;
     }
   }
-
   .drawer {
     Button {
       background-color: transparent;
@@ -124,6 +183,87 @@
     Button:highlighted {
       background-color: #eeeeee;
       color: #222222;
+    }
+  }
+  .bar {
+    background-color: darkblue;
+    width: 22;
+    height: 4;
+    margin-bottom: 3;
+    border-radius: 2;
+  }
+
+  .bar1.menu-bar-on {
+    animation-name: bar1anim;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+  }
+
+  .bar1.menu-bar-off {
+    animation-name: bar1anim;
+    animation-duration: 0.5s;
+    animation-fill-mode: backwards;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-direction: reverse;
+  }
+  .bar2.menu-bar-on {
+    animation-name: bar2anim;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+  }
+  .bar2.menu-bar-off {
+    animation-name: bar2anim;
+    animation-duration: 0.5s;
+    animation-fill-mode: backwards;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-direction: reverse;
+  }
+  .bar3.menu-bar-on {
+    animation-name: bar3anim;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+  }
+  .bar3.menu-bar-off {
+    animation-name: bar3anim;
+    animation-duration: 0.5s;
+    animation-fill-mode: backwards;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-direction: reverse;
+  }
+
+  @keyframes bar1anim {
+    from {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    to {
+      transform: translate(0, 7) rotate(45deg);
+    }
+  }
+  @keyframes bar2anim {
+    from {
+      transform: translate(0, 0);
+      opacity: 1;
+    }
+    to {
+      transform: translate(-10, 0);
+      opacity: 0;
+    }
+  }
+  @keyframes bar3anim {
+    from {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    to {
+      transform: translate(0, -7) rotate(-45deg);
     }
   }
 </style>
